@@ -57,7 +57,7 @@ function parseEntries(lines: string[]): JsonlEntry[] {
 function detectStatus(entries: JsonlEntry[], isAlive: boolean): ProcessStatus {
   if (!isAlive) return 'done'
 
-  // Find last assistant entry
+  // Find last assistant entry with tool_use
   for (let i = entries.length - 1; i >= 0; i--) {
     const entry = entries[i]
     if (entry.type === 'assistant' && entry.message?.content) {
@@ -65,11 +65,19 @@ function detectStatus(entries: JsonlEntry[], isAlive: boolean): ProcessStatus {
       if (content.length > 0) {
         const lastBlock = content[content.length - 1]
         if (lastBlock.type === 'tool_use') {
-          // Check if there's a tool_result after this
+          // Check if there's a tool_result after this assistant entry
           for (let j = i + 1; j < entries.length; j++) {
-            if (entries[j].type === 'result') return 'running'
+            const later = entries[j]
+            if (later.type === 'user' && Array.isArray(later.message?.content)) {
+              const blocks = later.message!.content as Array<{ type: string }>
+              if (blocks.some((b) => b.type === 'tool_result')) return 'running'
+            }
           }
           return 'approval'
+        }
+        // If last block is text/thinking, it's running (not waiting for approval)
+        if (lastBlock.type === 'text' || lastBlock.type === 'thinking') {
+          return 'running'
         }
       }
     }

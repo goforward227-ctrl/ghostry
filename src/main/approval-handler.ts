@@ -2,11 +2,11 @@ import { exec } from 'child_process'
 
 export class ApprovalHandler {
   async approve(tty: string): Promise<{ success: boolean; error?: string }> {
-    return this.sendToTerminal(tty, 'y')
+    return this.sendToTerminal(tty, '1')
   }
 
   async reject(tty: string): Promise<{ success: boolean; error?: string }> {
-    return this.sendToTerminal(tty, 'n')
+    return this.sendToTerminal(tty, '\x1b')
   }
 
   private async sendToTerminal(
@@ -45,7 +45,7 @@ export class ApprovalHandler {
           repeat with t in tabs of w
             repeat with s in sessions of t
               if tty of s is "${ttyDevice}" then
-                tell s to write text "${text}"
+                tell s to write text "${text}" newline no
                 return true
               end if
             end repeat
