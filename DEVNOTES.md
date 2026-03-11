@@ -76,10 +76,32 @@ AppleScript経由でターミナルにキー送信:
 
 ## 残タスク
 
+### 最優先: DMG Finderドラッグ問題
+FinderでDMGからApplicationsにドラッグインストールすると、アプリは起動するがプロセスが検出されない。
+CLIで`cp -R`すると正常動作する。原因不明。
+
+**確認済み事実:**
+- `cp -R /Volumes/Ghostride/Ghostride.app /Applications/` → 動く
+- Finderでドラッグ → 動かない（一覧が空）
+- codesign済み（Team IDミスマッチは解消済み、クラッシュはしない）
+- `ps`, `lsof`のフルパス化済み、NFC正規化済み
+
+**疑い:**
+- Finderコピー時にmacOS 15がcodesignatureを再検証して何かブロック？
+- quarantine/provenance属性の影響？
+- Electron Frameworkのサンドボックス/権限がFinderコピーで変わる？
+
+**調査方法案:**
+- Finderドラッグ後に`codesign -dvvv`で署名状態比較
+- `xattr -l`で属性比較（cp -R版 vs Finderドラッグ版）
+- Console.appでサンドボックス/権限エラーを確認
+- `log stream --predicate 'process == "Ghostride"'`でシステムログ確認
+
 ### リリース準備
-- [ ] .dmg ビルド (`npm run build:mac`)
+- [ ] 上記DMG問題の解決
 - [ ] デモGIF作成 (README用)
 - [ ] GitHub リポを public に変更
+- [ ] GitHub Releasesに.dmgアップロード
 - [ ] Product Hunt ローンチ
 
 ### 機能追加候補
