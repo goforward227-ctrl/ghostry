@@ -16,29 +16,33 @@ interface JsonlEntry {
 }
 
 function readTailLines(filePath: string, bytes: number): string[] {
+  let fd: number | undefined
   try {
     const stat = fs.statSync(filePath)
     const size = stat.size
     const start = Math.max(0, size - bytes)
-    const fd = fs.openSync(filePath, 'r')
+    fd = fs.openSync(filePath, 'r')
     const buf = Buffer.alloc(Math.min(bytes, size))
     fs.readSync(fd, buf, 0, buf.length, start)
-    fs.closeSync(fd)
     return buf.toString('utf-8').split('\n').filter((l) => l.trim())
   } catch {
     return []
+  } finally {
+    if (fd !== undefined) fs.closeSync(fd)
   }
 }
 
 function readHeadLines(filePath: string, bytes: number): string[] {
+  let fd: number | undefined
   try {
-    const fd = fs.openSync(filePath, 'r')
+    fd = fs.openSync(filePath, 'r')
     const buf = Buffer.alloc(bytes)
     const bytesRead = fs.readSync(fd, buf, 0, bytes, 0)
-    fs.closeSync(fd)
     return buf.slice(0, bytesRead).toString('utf-8').split('\n').filter((l) => l.trim())
   } catch {
     return []
+  } finally {
+    if (fd !== undefined) fs.closeSync(fd)
   }
 }
 

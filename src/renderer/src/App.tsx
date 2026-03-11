@@ -3,21 +3,6 @@ import type { ClaudeProcessDTO } from '../../preload/index.d'
 import { t, getLocale, setLocale, onLocaleChange, type Locale } from './i18n'
 import './App.css'
 
-const SPINNER_FRAMES = ['·', '✢', '✶', '✻', '⏺', '✻', '✢', '·']
-
-function Spinner({ color }: { color: string }): React.ReactNode {
-  const [frame, setFrame] = useState(0)
-  useEffect(() => {
-    const id = setInterval(() => setFrame((f) => (f + 1) % SPINNER_FRAMES.length), 150)
-    return (): void => clearInterval(id)
-  }, [])
-  return (
-    <span style={{ color, fontSize: 10, lineHeight: 1, flexShrink: 0, width: 10, textAlign: 'center', display: 'inline-block' }}>
-      {SPINNER_FRAMES[frame]}
-    </span>
-  )
-}
-
 type TabType = 'all' | 'pending'
 
 const statusColors = {
@@ -104,7 +89,11 @@ function App(): React.ReactNode {
   }, [])
 
   const bulkApprove = useCallback(async () => {
-    await window.api.bulkApprove()
+    try {
+      await window.api.bulkApprove()
+    } catch {
+      setError(t().commError)
+    }
   }, [])
 
   const approvalCount = processes.filter((p) => p.status === 'approval').length
@@ -337,7 +326,11 @@ function App(): React.ReactNode {
                           onChange={(e) => setEditValue(e.target.value)}
                           onBlur={async () => {
                             if (editValue.trim() && editValue.trim() !== p.name) {
-                              await window.api.rename(p.id, editValue.trim())
+                              try {
+                                await window.api.rename(p.id, editValue.trim())
+                              } catch {
+                                // Silent fail - name reverts on next scan
+                              }
                             }
                             setEditing(null)
                           }}

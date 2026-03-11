@@ -83,8 +83,12 @@ async function handleBulkApprove(): Promise<void> {
   let approved = 0
   for (const proc of processMap.values()) {
     if (proc.status === 'approval') {
-      const result = await approvalHandler.approve(proc.tty)
-      if (result.success) approved++
+      try {
+        const result = await approvalHandler.approve(proc.tty)
+        if (result.success) approved++
+      } catch {
+        // Skip failed approvals
+      }
     }
   }
   if (approved > 0) {

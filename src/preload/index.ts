@@ -19,6 +19,7 @@ export interface ClaudeProcessDTO {
 
 const api: GhostrideAPI = {
   onProcessesUpdated: (callback) => {
+    ipcRenderer.removeAllListeners('processes-updated')
     ipcRenderer.on('processes-updated', (_event, processes) => {
       callback(processes)
     })
