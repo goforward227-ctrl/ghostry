@@ -65,7 +65,7 @@ function detectStatus(entries: JsonlEntry[], isAlive: boolean, mtimeMs: number):
   for (let i = entries.length - 1; i >= 0; i--) {
     const entry = entries[i]
     if (entry.type === 'assistant' && entry.message?.content) {
-      const content = entry.message.content as Array<{ type: string }>
+      const content = entry.message.content as Array<{ type: string; name?: string }>
       if (content.length > 0) {
         const lastBlock = content[content.length - 1]
         if (lastBlock.type === 'tool_use') {
@@ -77,6 +77,8 @@ function detectStatus(entries: JsonlEntry[], isAlive: boolean, mtimeMs: number):
               if (blocks.some((b) => b.type === 'tool_result')) return 'running'
             }
           }
+          // AskUserQuestion = input prompt, not tool approval
+          if (lastBlock.name === 'AskUserQuestion') return 'input'
           return 'approval'
         }
         // If last block is text/thinking and file recently updated, still running

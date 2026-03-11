@@ -1,4 +1,4 @@
-export type ProcessStatus = 'approval' | 'running' | 'idle' | 'done'
+export type ProcessStatus = 'approval' | 'input' | 'running' | 'idle' | 'done'
 
 export interface ClaudeProcess {
   id: string // sessionId

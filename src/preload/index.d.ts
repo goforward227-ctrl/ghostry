@@ -1,7 +1,7 @@
 export interface ClaudeProcessDTO {
   id: string
   pid: number
-  status: 'approval' | 'running' | 'idle' | 'done'
+  status: 'approval' | 'input' | 'running' | 'idle' | 'done'
   name: string
   message: string
   lastTimestamp: number

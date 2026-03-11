@@ -3,17 +3,34 @@ import type { ClaudeProcessDTO } from '../../preload/index.d'
 import { t, getLocale, setLocale, onLocaleChange, type Locale } from './i18n'
 import './App.css'
 
+const SPINNER_FRAMES = ['·', '✢', '✶', '✻', '⏺', '✻', '✢', '·']
+
+function Spinner({ color }: { color: string }): React.ReactNode {
+  const [frame, setFrame] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setFrame((f) => (f + 1) % SPINNER_FRAMES.length), 150)
+    return (): void => clearInterval(id)
+  }, [])
+  return (
+    <span style={{ color, fontSize: 10, lineHeight: 1, flexShrink: 0, width: 10, textAlign: 'center', display: 'inline-block' }}>
+      {SPINNER_FRAMES[frame]}
+    </span>
+  )
+}
+
 type TabType = 'all' | 'pending'
 
 const statusColors = {
-  approval: { color: '#F5C542', dotColor: '#F5C542', pulse: false },
-  running: { color: '#007AFF', dotColor: '#007AFF', pulse: true },
+  approval: { color: '#DF755D', dotColor: '#DF755D', pulse: false },
+  input: { color: '#DF755D', dotColor: '#DF755D', pulse: false },
+  running: { color: '#1d1d1f', dotColor: '#1d1d1f', pulse: true },
   idle: { color: '#aeaeb2', dotColor: '#c7c7cc', pulse: false },
   done: { color: '#c7c7cc', dotColor: '#d1d1d6', pulse: false }
 }
 
 const statusLabelKey = {
   approval: 'statusApproval',
+  input: 'statusInput',
   running: 'statusRunning',
   idle: 'statusIdle',
   done: 'statusDone'
@@ -180,7 +197,7 @@ function App(): React.ReactNode {
                   fontSize: 12,
                   color: activeTab === tab.key ? '#1d1d1f' : '#6e6e73',
                   borderBottom:
-                    activeTab === tab.key ? '2px solid #007AFF' : '2px solid transparent',
+                    activeTab === tab.key ? '2px solid #1d1d1f' : '2px solid transparent',
                   fontFamily: 'inherit',
                   transition: 'color 0.15s'
                 }}
@@ -190,12 +207,19 @@ function App(): React.ReactNode {
                   <span
                     style={{
                       marginLeft: 5,
-                      background: '#FF9500',
+                      background: '#DF755D',
                       color: '#fff',
                       borderRadius: 8,
-                      padding: '0 5px',
-                      fontSize: 10,
-                      fontWeight: 700
+                      padding: '1px 5px 0 4px',
+                      fontSize: 9,
+                      fontWeight: 700,
+                      lineHeight: '16px',
+                      height: 16,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minWidth: 16,
+                      verticalAlign: 'middle'
                     }}
                   >
                     {approvalCount}
@@ -208,7 +232,7 @@ function App(): React.ReactNode {
             <button
               onClick={bulkApprove}
               style={{
-                background: '#007AFF',
+                background: '#DF755D',
                 border: 'none',
                 borderRadius: 6,
                 padding: '4px 10px',
@@ -328,7 +352,7 @@ function App(): React.ReactNode {
                             color: '#1d1d1f',
                             fontWeight: 600,
                             fontSize: 13,
-                            border: '1px solid #007AFF',
+                            border: '1px solid #1d1d1f',
                             borderRadius: 4,
                             padding: '1px 4px',
                             fontFamily: 'inherit',
@@ -390,7 +414,7 @@ function App(): React.ReactNode {
                         onClick={() => approve(p.id)}
                         disabled={loading === p.id}
                         style={{
-                          background: loading === p.id ? '#99c9ff' : '#007AFF',
+                          background: loading === p.id ? '#6e6e73' : '#1d1d1f',
                           border: 'none',
                           borderRadius: 6,
                           padding: '5px 10px',

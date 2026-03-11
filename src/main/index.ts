@@ -1,4 +1,4 @@
-import { app, Menu } from 'electron'
+import { app, Menu, Notification } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { createWindow, getMainWindow } from './window'
 import { createTray, updateTrayTitle } from './tray'
@@ -20,6 +20,7 @@ if (!gotTheLock) {
 const processMap = new Map<string, ClaudeProcess>()
 const approvalHandler = new ApprovalHandler()
 let rendererReady = false
+const notifiedInputIds = new Set<string>()
 
 // Project names persisted by cwd
 let projectNames: Record<string, string> = {}
@@ -63,7 +64,7 @@ function getProcessMap(): Map<string, ClaudeProcess> {
 
 function sendProcessesToRenderer(): void {
   const pendingCount = Array.from(processMap.values()).filter(
-    (p) => p.status === 'approval'
+    (p) => p.status === 'approval' || p.status === 'input'
   ).length
   updateTrayTitle(pendingCount)
 
@@ -115,11 +116,24 @@ function mergeProcessData(scanResults: ScanResult[]): void {
       lastTimestamp: parsed.lastTimestamp
     }
     processMap.set(session.sessionId, proc)
+
+    // Notify once when input status is detected
+    if (proc.status === 'input' && !notifiedInputIds.has(proc.id)) {
+      notifiedInputIds.add(proc.id)
+      new Notification({
+        title: 'Ghostride',
+        body: `${proc.name}: Waiting for your input`
+      }).show()
+    }
+    if (proc.status !== 'input') {
+      notifiedInputIds.delete(proc.id)
+    }
   }
 
   for (const [sessionId, proc] of processMap) {
     if (!aliveSessionIds.has(proc.id)) {
       processMap.delete(sessionId)
+      notifiedInputIds.delete(sessionId)
     }
   }
 
