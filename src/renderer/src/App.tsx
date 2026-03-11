@@ -54,9 +54,10 @@ function App(): React.ReactNode {
   }, [])
 
   useEffect(() => {
-    window.api.onProcessesUpdated((data) => {
+    const unsubscribe = window.api.onProcessesUpdated((data) => {
       setProcesses(data)
     })
+    return unsubscribe
   }, [])
 
   const approve = useCallback(async (id: string) => {

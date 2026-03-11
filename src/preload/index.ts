@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
 export interface GhostrideAPI {
-  onProcessesUpdated: (callback: (processes: ClaudeProcessDTO[]) => void) => void
+  onProcessesUpdated: (callback: (processes: ClaudeProcessDTO[]) => void) => () => void
   approve: (id: string) => Promise<{ success: boolean; error?: string }>
   reject: (id: string) => Promise<{ success: boolean; error?: string }>
   bulkApprove: () => Promise<{ approved: number; failed: number }>
@@ -20,10 +20,13 @@ export interface ClaudeProcessDTO {
 
 const api: GhostrideAPI = {
   onProcessesUpdated: (callback) => {
-    ipcRenderer.removeAllListeners('processes-updated')
-    ipcRenderer.on('processes-updated', (_event, processes) => {
+    const handler = (_event: Electron.IpcRendererEvent, processes: ClaudeProcessDTO[]): void => {
       callback(processes)
-    })
+    }
+    ipcRenderer.on('processes-updated', handler)
+    return (): void => {
+      ipcRenderer.removeListener('processes-updated', handler)
+    }
   },
   approve: (id: string) => ipcRenderer.invoke('approve', id),
   reject: (id: string) => ipcRenderer.invoke('reject', id),

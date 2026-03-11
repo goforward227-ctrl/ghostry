@@ -9,7 +9,7 @@ export interface ClaudeProcessDTO {
 }
 
 export interface GhostrideAPI {
-  onProcessesUpdated: (callback: (processes: ClaudeProcessDTO[]) => void) => void
+  onProcessesUpdated: (callback: (processes: ClaudeProcessDTO[]) => void) => () => void
   approve: (id: string) => Promise<{ success: boolean; error?: string }>
   reject: (id: string) => Promise<{ success: boolean; error?: string }>
   bulkApprove: () => Promise<{ approved: number; failed: number }>

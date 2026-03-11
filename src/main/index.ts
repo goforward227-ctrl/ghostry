@@ -179,6 +179,13 @@ function mergeProcessData(scanResults: ScanResult[]): void {
     }
   }
 
+  // Clean up stale notifiedInputIds entries
+  for (const id of notifiedInputIds) {
+    if (!processMap.has(id)) {
+      notifiedInputIds.delete(id)
+    }
+  }
+
   sendProcessesToRenderer()
 }
 

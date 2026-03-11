@@ -1,10 +1,10 @@
-import chokidar from 'chokidar'
+import chokidar, { type FSWatcher } from 'chokidar'
 import { EventEmitter } from 'events'
 import { homedir } from 'os'
 import { join } from 'path'
 
 export class SessionWatcher extends EventEmitter {
-  private watcher: chokidar.FSWatcher | null = null
+  private watcher: FSWatcher | null = null
 
   start(): void {
     if (this.watcher) return // Already running

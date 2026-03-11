@@ -72,7 +72,7 @@ export function setLocale(locale: Locale): void {
 }
 
 export function t(): Translations {
-  return translations[currentLocale]
+  return translations[currentLocale] as Translations
 }
 
 export function onLocaleChange(fn: () => void): () => void {

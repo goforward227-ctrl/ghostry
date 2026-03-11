@@ -1,5 +1,8 @@
 import { exec } from 'child_process'
 
+// Validate TTY name to prevent AppleScript injection
+const TTY_PATTERN = /^ttys[0-9]+$/
+
 export class ApprovalHandler {
   async approve(tty: string): Promise<{ success: boolean; error?: string }> {
     return this.sendToTerminal(tty, '1')
@@ -13,6 +16,11 @@ export class ApprovalHandler {
     tty: string,
     text: string
   ): Promise<{ success: boolean; error?: string }> {
+    // Validate TTY format to prevent injection
+    if (!TTY_PATTERN.test(tty)) {
+      return { success: false, error: 'Invalid TTY device format' }
+    }
+
     const ttyDevice = `/dev/${tty}`
 
     // Try iTerm2 first, then Terminal.app
