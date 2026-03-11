@@ -117,10 +117,11 @@ function extractMessage(entries: JsonlEntry[]): string {
   return ''
 }
 
-export function findSessionForCwd(
+export function findSessionsForCwd(
   cwd: string
-): { sessionId: string; filePath: string } | null {
+): Array<{ sessionId: string; filePath: string }> {
   const claudeDir = join(homedir(), '.claude', 'projects')
+  const results: Array<{ sessionId: string; filePath: string }> = []
 
   try {
     const projectDirs = fs.readdirSync(claudeDir)
@@ -165,10 +166,11 @@ export function findSessionForCwd(
         const headEntries = parseEntries(headLines)
         for (const entry of headEntries) {
           if (entry.cwd === cwd) {
-            return {
+            results.push({
               sessionId: file.name.replace('.jsonl', ''),
               filePath: file.path
-            }
+            })
+            break
           }
         }
       }
@@ -177,7 +179,7 @@ export function findSessionForCwd(
     // Directory doesn't exist yet
   }
 
-  return null
+  return results
 }
 
 export function parseSession(

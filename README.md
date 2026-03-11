@@ -2,8 +2,7 @@
 
 A macOS menu bar app that monitors your running [Claude Code](https://docs.anthropic.com/en/docs/claude-code) sessions and lets you approve or reject tool-use prompts with a single click.
 
-<!-- TODO: Add demo GIF here -->
-<!-- ![Ghostride Demo](docs/demo.gif) -->
+![Ghostride Screenshot](docs/screenshot.png)
 
 ## Why?
 

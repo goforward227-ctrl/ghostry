@@ -6,7 +6,7 @@ import { registerIpcHandlers } from './ipc'
 import { ProcessScanner } from './process-scanner'
 import { SessionWatcher } from './session-watcher'
 import { ApprovalHandler } from './approval-handler'
-import { findSessionForCwd, parseSession } from './session-parser'
+import { findSessionsForCwd, parseSession } from './session-parser'
 import { basename, join } from 'path'
 import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import type { ClaudeProcess, ScanResult } from './types'
@@ -123,14 +123,18 @@ async function handleBulkApprove(): Promise<void> {
 
 function mergeProcessData(scanResults: ScanResult[]): void {
   const aliveSessionIds = new Set<string>()
+  const usedSessionIds = new Set<string>()
 
   for (const scan of scanResults) {
-    const session = findSessionForCwd(scan.cwd)
+    const sessions = findSessionsForCwd(scan.cwd)
+    // Pick the first session not already claimed by another process
+    const session = sessions.find((s) => !usedSessionIds.has(s.sessionId))
     if (!session) continue
 
     const parsed = parseSession(session.filePath, true)
     if (!parsed) continue
 
+    usedSessionIds.add(session.sessionId)
     aliveSessionIds.add(session.sessionId)
 
     const existing = processMap.get(session.sessionId)
