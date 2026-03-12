@@ -67,7 +67,7 @@ export function getLocale(): Locale {
 
 export function setLocale(locale: Locale): void {
   currentLocale = locale
-  localStorage.setItem('ghostride-locale', locale)
+  localStorage.setItem('ghostry-locale', locale)
   listeners.forEach((fn) => fn())
 }
 
@@ -81,7 +81,7 @@ export function onLocaleChange(fn: () => void): () => void {
 }
 
 // Restore saved preference
-const saved = localStorage.getItem('ghostride-locale')
+const saved = localStorage.getItem('ghostry-locale')
 if (saved && saved in translations) {
   currentLocale = saved as Locale
 }

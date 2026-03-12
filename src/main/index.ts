@@ -169,7 +169,7 @@ function mergeProcessData(scanResults: ScanResult[]): void {
     if (proc.status === 'input' && !notifiedInputIds.has(proc.id)) {
       notifiedInputIds.add(proc.id)
       new Notification({
-        title: 'Ghostride',
+        title: 'Ghostry',
         body: `${proc.name}: Waiting for your input`
       }).show()
     }
@@ -209,7 +209,7 @@ app.on('second-instance', () => {
 })
 
 app.whenReady().then(() => {
-  electronApp.setAppUserModelId('com.ghostride.app')
+  electronApp.setAppUserModelId('com.ghostry.app')
 
   // Hide from Dock - menu bar only app
   app.dock?.hide()
@@ -224,7 +224,7 @@ app.whenReady().then(() => {
   // Minimal app menu (for keyboard shortcut to work)
   const menu = Menu.buildFromTemplate([
     {
-      label: 'Ghostride',
+      label: 'Ghostry',
       submenu: [
         {
           label: '一括承認',

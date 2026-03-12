@@ -1,5 +1,5 @@
-appId: com.ghostride.app
-productName: Ghostride
+appId: com.ghostry.app
+productName: Ghostry
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: ghostride
+  executableName: ghostry
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

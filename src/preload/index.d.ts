@@ -8,7 +8,7 @@ export interface ClaudeProcessDTO {
   autoApprove: boolean
 }
 
-export interface GhostrideAPI {
+export interface GhostryAPI {
   onProcessesUpdated: (callback: (processes: ClaudeProcessDTO[]) => void) => () => void
   approve: (id: string) => Promise<{ success: boolean; error?: string }>
   reject: (id: string) => Promise<{ success: boolean; error?: string }>
@@ -19,6 +19,6 @@ export interface GhostrideAPI {
 
 declare global {
   interface Window {
-    api: GhostrideAPI
+    api: GhostryAPI
   }
 }

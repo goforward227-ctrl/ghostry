@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
-export interface GhostrideAPI {
+export interface GhostryAPI {
   onProcessesUpdated: (callback: (processes: ClaudeProcessDTO[]) => void) => () => void
   approve: (id: string) => Promise<{ success: boolean; error?: string }>
   reject: (id: string) => Promise<{ success: boolean; error?: string }>
@@ -18,7 +18,7 @@ export interface ClaudeProcessDTO {
   lastTimestamp: number
 }
 
-const api: GhostrideAPI = {
+const api: GhostryAPI = {
   onProcessesUpdated: (callback) => {
     const handler = (_event: Electron.IpcRendererEvent, processes: ClaudeProcessDTO[]): void => {
       callback(processes)

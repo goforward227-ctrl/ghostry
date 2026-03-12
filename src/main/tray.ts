@@ -57,7 +57,7 @@ export function createTray(
   buildIcons()
 
   tray = new Tray(normalIcon)
-  tray.setToolTip('Ghostride')
+  tray.setToolTip('Ghostry')
 
   // Left-click: toggle popover panel below tray icon
   tray.on('click', (_event, bounds) => {
