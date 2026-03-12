@@ -8,6 +8,7 @@ import { SessionWatcher } from './session-watcher'
 import { ApprovalHandler } from './approval-handler'
 import { findSessionsForCwd, parseSession } from './session-parser'
 import { basename, join } from 'path'
+import { t } from './i18n'
 import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import type { ClaudeProcess, ScanResult } from './types'
 
@@ -21,6 +22,7 @@ const processMap = new Map<string, ClaudeProcess>()
 const approvalHandler = new ApprovalHandler()
 let rendererReady = false
 const notifiedInputIds = new Set<string>()
+const notifiedApprovalIds = new Set<string>() // Track notified approval sessions
 const autoApprovedIds = new Set<string>() // Track auto-approved sessions to prevent duplicates
 
 // Project settings persisted by cwd
@@ -165,12 +167,37 @@ function mergeProcessData(scanResults: ScanResult[]): void {
       autoApprovedIds.delete(proc.id)
     }
 
+    // Notify once when approval status is detected (skip if auto-approve is enabled)
+    if (proc.status === 'approval' && !proc.autoApprove && !notifiedApprovalIds.has(proc.id)) {
+      notifiedApprovalIds.add(proc.id)
+      const notification = new Notification({
+        title: 'Ghostry',
+        body: `${proc.name}: ${t().approvalRequired}`,
+        actions: [{ type: 'button', text: t().approve }]
+      })
+      notification.on('action', () => {
+        approvalHandler.approve(proc.tty).catch(() => {})
+        setTimeout(() => scanner.scan(), 500)
+      })
+      notification.on('click', () => {
+        const win = getMainWindow()
+        if (win) {
+          win.show()
+          win.focus()
+        }
+      })
+      notification.show()
+    }
+    if (proc.status !== 'approval') {
+      notifiedApprovalIds.delete(proc.id)
+    }
+
     // Notify once when input status is detected
     if (proc.status === 'input' && !notifiedInputIds.has(proc.id)) {
       notifiedInputIds.add(proc.id)
       new Notification({
         title: 'Ghostry',
-        body: `${proc.name}: Waiting for your input`
+        body: `${proc.name}: ${t().waitingForInput}`
       }).show()
     }
     if (proc.status !== 'input') {
@@ -182,6 +209,7 @@ function mergeProcessData(scanResults: ScanResult[]): void {
     if (!aliveSessionIds.has(proc.id)) {
       processMap.delete(sessionId)
       notifiedInputIds.delete(sessionId)
+      notifiedApprovalIds.delete(sessionId)
       autoApprovedIds.delete(sessionId)
     }
   }
