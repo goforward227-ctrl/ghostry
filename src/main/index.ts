@@ -21,6 +21,7 @@ const processMap = new Map<string, ClaudeProcess>()
 const approvalHandler = new ApprovalHandler()
 let rendererReady = false
 const notifiedInputIds = new Set<string>()
+const autoApprovedIds = new Set<string>() // Track auto-approved sessions to prevent duplicates
 
 // Project settings persisted by cwd
 interface ProjectSetting {
@@ -152,11 +153,16 @@ function mergeProcessData(scanResults: ScanResult[]): void {
     }
     processMap.set(session.sessionId, proc)
 
-    // Auto-approve: fire-and-forget when enabled
-    if (proc.status === 'approval' && proc.autoApprove) {
+    // Auto-approve: fire-and-forget when enabled (prevent duplicate sends)
+    if (proc.status === 'approval' && proc.autoApprove && !autoApprovedIds.has(proc.id)) {
+      autoApprovedIds.add(proc.id)
       approvalHandler.approve(proc.tty).catch(() => {})
-      processMap.delete(session.sessionId)
-      continue
+      // Keep in processMap but mark as handled - will be cleaned up when status changes
+    }
+
+    // Clear auto-approved flag when status changes from approval
+    if (proc.status !== 'approval') {
+      autoApprovedIds.delete(proc.id)
     }
 
     // Notify once when input status is detected
@@ -176,6 +182,7 @@ function mergeProcessData(scanResults: ScanResult[]): void {
     if (!aliveSessionIds.has(proc.id)) {
       processMap.delete(sessionId)
       notifiedInputIds.delete(sessionId)
+      autoApprovedIds.delete(sessionId)
     }
   }
 
@@ -244,12 +251,14 @@ app.whenReady().then(() => {
     scanner.scan()
   })
 
+  // Start scanner and watcher immediately (don't wait for window load)
+  scanner.start(1500)
+  watcher.start()
+
   // Track renderer readiness (HMR reloads cause frame disposal)
   win.webContents.on('did-finish-load', () => {
     rendererReady = true
     sendProcessesToRenderer()
-    scanner.start(1500)
-    watcher.start()
   })
   win.webContents.on('did-start-navigation', () => {
     rendererReady = false

@@ -30,5 +30,6 @@ export class SessionWatcher extends EventEmitter {
 
   stop(): void {
     this.watcher?.close()
+    this.watcher = null
   }
 }

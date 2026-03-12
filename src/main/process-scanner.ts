@@ -2,6 +2,47 @@ import { EventEmitter } from 'events'
 import { execFile } from 'child_process'
 import type { ScanResult } from './types'
 
+// Ensure UTF-8 encoding for child processes (important when launched from GUI)
+const UTF8_ENV = {
+  ...process.env,
+  LANG: 'en_US.UTF-8',
+  LC_ALL: 'en_US.UTF-8'
+}
+
+// lsof escapes non-ASCII bytes as \xNN in some environments
+// This function converts them back to actual UTF-8 bytes
+// If the string doesn't contain escape sequences, return as-is
+function unescapeLsofPath(str: string): string {
+  // Check if the string contains \xNN escape sequences
+  if (!str.includes('\\x')) {
+    // No escape sequences - return as-is (already valid UTF-8)
+    return str
+  }
+
+  // Replace \xNN sequences with actual bytes
+  const bytes: number[] = []
+  let i = 0
+  while (i < str.length) {
+    if (str[i] === '\\' && str[i + 1] === 'x' && i + 4 <= str.length) {
+      const hex = str.slice(i + 2, i + 4)
+      const byte = parseInt(hex, 16)
+      if (!isNaN(byte)) {
+        bytes.push(byte)
+        i += 4
+        continue
+      }
+    }
+    // For non-escape characters, convert to UTF-8 bytes properly
+    const char = str[i]
+    const encoded = Buffer.from(char, 'utf8')
+    for (const b of encoded) {
+      bytes.push(b)
+    }
+    i++
+  }
+  return Buffer.from(bytes).toString('utf8')
+}
+
 export class ProcessScanner extends EventEmitter {
   private interval: ReturnType<typeof setInterval> | null = null
 
@@ -19,7 +60,7 @@ export class ProcessScanner extends EventEmitter {
   }
 
   scan(): void {
-    execFile('/bin/ps', ['-eo', 'pid,tty,comm'], { timeout: 5000 }, (err, stdout) => {
+    execFile('/bin/ps', ['-eo', 'pid,tty,comm'], { timeout: 5000, env: UTF8_ENV, encoding: 'utf8' }, (err, stdout) => {
       if (err) {
         this.emit('processes', [])
         return
@@ -59,15 +100,18 @@ export class ProcessScanner extends EventEmitter {
         execFile(
           '/usr/sbin/lsof',
           ['-a', '-p', String(proc.pid), '-d', 'cwd', '-Fn'],
-          { timeout: 3000 },
+          { timeout: 3000, env: UTF8_ENV, encoding: 'utf8' },
           (lsofErr, lsofStdout) => {
             if (!lsofErr && lsofStdout) {
               const lines = lsofStdout.split('\n')
               for (const l of lines) {
                 if (l.startsWith('n/')) {
+                  // Unescape \xNN sequences that lsof uses for non-ASCII chars
+                  const rawPath = l.slice(1)
+                  const cwd = unescapeLsofPath(rawPath)
                   results.push({
                     pid: proc.pid,
-                    cwd: l.slice(1),
+                    cwd,
                     tty: proc.tty
                   })
                   break

@@ -5,14 +5,33 @@ import { showWindowBelowTray, setQuitting } from './window'
 
 let tray: Tray | null = null
 
-const res = (...parts: string[]): string => join(__dirname, '../../resources', ...parts)
+const res = (...parts: string[]): string => {
+  let basePath: string
+  if (app.isPackaged) {
+    // In production, resources are in app.asar.unpacked/resources
+    // Fallback if process.resourcesPath is undefined
+    const resourcesPath =
+      process.resourcesPath || join(app.getPath('exe'), '..', 'Resources')
+    basePath = join(resourcesPath, 'app.asar.unpacked', 'resources')
+  } else {
+    basePath = join(__dirname, '../../resources')
+  }
+  return join(basePath, ...parts)
+}
 
 function loadImage(name1x: string, name2x: string, template = false): Electron.NativeImage {
-  const img = nativeImage.createEmpty()
-  img.addRepresentation({ scaleFactor: 1.0, buffer: readFileSync(res(name1x)) })
-  img.addRepresentation({ scaleFactor: 2.0, buffer: readFileSync(res(name2x)) })
-  if (template) img.setTemplateImage(true)
-  return img
+  try {
+    const img = nativeImage.createEmpty()
+    const path1x = res(name1x)
+    const path2x = res(name2x)
+    img.addRepresentation({ scaleFactor: 1.0, buffer: readFileSync(path1x) })
+    img.addRepresentation({ scaleFactor: 2.0, buffer: readFileSync(path2x) })
+    if (template) img.setTemplateImage(true)
+    return img
+  } catch (err) {
+    console.error('[Tray] Failed to load icon:', name1x, err)
+    return nativeImage.createEmpty()
+  }
 }
 
 let normalIcon: Electron.NativeImage
