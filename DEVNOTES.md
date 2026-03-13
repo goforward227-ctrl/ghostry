@@ -1,10 +1,10 @@
-# Ghostride — 開発ノート
+# Ghostry — 開発ノート
 
 ## プロジェクト概要
 
 macOSメニューバー常駐アプリ。複数のClaude Codeセッションを一元監視し、ツール承認をワンクリックで処理する。
 
-- **リポ**: https://github.com/goforward227-ctrl/ghostride (private)
+- **リポ**: https://github.com/goforward227-ctrl/ghostry
 - **スタック**: Electron 39 + electron-vite + React 19 + TypeScript
 - **ターゲット**: macOS only (AppleScript依存)
 
@@ -50,7 +50,7 @@ AppleScript経由でターミナルにキー送信:
 
 ## 永続化 (project-names.json)
 
-`~/Library/Application Support/ghostride/project-names.json`:
+`~/Library/Application Support/ghostry/project-names.json`:
 ```json
 {
   "/path/to/project": {
@@ -76,33 +76,14 @@ AppleScript経由でターミナルにキー送信:
 
 ## 残タスク
 
-### 最優先: DMG Finderドラッグ問題
-FinderでDMGからApplicationsにドラッグインストールすると、アプリは起動するがプロセスが検出されない。
-CLIで`cp -R`すると正常動作する。原因不明。
-
-**確認済み事実:**
-- `cp -R /Volumes/Ghostride/Ghostride.app /Applications/` → 動く
-- Finderでドラッグ → 動かない（一覧が空）
-- codesign済み（Team IDミスマッチは解消済み、クラッシュはしない）
-- `ps`, `lsof`のフルパス化済み、NFC正規化済み
-
-**疑い:**
-- Finderコピー時にmacOS 15がcodesignatureを再検証して何かブロック？
-- quarantine/provenance属性の影響？
-- Electron Frameworkのサンドボックス/権限がFinderコピーで変わる？
-
-**調査方法案:**
-- Finderドラッグ後に`codesign -dvvv`で署名状態比較
-- `xattr -l`で属性比較（cp -R版 vs Finderドラッグ版）
-- Console.appでサンドボックス/権限エラーを確認
-- `log stream --predicate 'process == "Ghostride"'`でシステムログ確認
-
-### リリース準備
-- [ ] 上記DMG問題の解決
+### リリース関連
+- [x] GitHub リポを public に変更
+- [x] GitHub Releasesに.zipアップロード
+- [x] Homebrew tap 作成
 - [ ] デモGIF作成 (README用)
-- [ ] GitHub リポを public に変更
-- [ ] GitHub Releasesに.dmgアップロード
 - [ ] Product Hunt ローンチ
+
+> **Note:** DMG配布は Finder ドラッグ時のプロセス検出問題により .zip 配布に切り替え済み。
 
 ### 機能追加候補
 - [ ] Warp / Kitty / Alacritty 対応
@@ -111,7 +92,7 @@ CLIで`cp -R`すると正常動作する。原因不明。
 
 ### 既知の制約
 - macOS only (AppleScript依存)
-- Claude Codeの「Yes, allow all」選択後はGhostrideに表示されない (Claude側で自動処理)
+- Claude Codeの「Yes, allow all」選択後はGhostryに表示されない (Claude側で自動処理)
 - シングルインスタンスロック: 2つ目の起動は即終了して既存ウィンドウをフォーカス
 
 ## 開発コマンド
@@ -119,7 +100,7 @@ CLIで`cp -R`すると正常動作する。原因不明。
 ```bash
 npm install          # 依存インストール
 npm run dev          # 開発サーバー起動 (HMR対応)
-npm run build:mac    # .dmg ビルド
+npm run build:mac    # macOS ビルド
 npm run typecheck    # 型チェック
 ```
 

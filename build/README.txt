@@ -1,6 +1,6 @@
-Ghostride - Installation Guide
+Ghostry - Installation Guide
 
-1. Drag "Ghostride.app" to the Applications folder.
+1. Drag "Ghostry.app" to the Applications folder.
 
 2. First launch:
    Right-click the app > Open > Click "Open" in the dialog.
@@ -9,13 +9,13 @@ Ghostride - Installation Guide
    System Settings > Privacy & Security > Scroll down > "Open Anyway"
 
 4. Updating:
-   Quit Ghostride first (right-click menu bar icon > Quit), then drag the new version.
+   Quit Ghostry first (right-click menu bar icon > Quit), then drag the new version.
 
 ---
 
-Ghostride - インストールガイド
+Ghostry - インストールガイド
 
-1. "Ghostride.app" を Applications フォルダにドラッグしてください。
+1. "Ghostry.app" を Applications フォルダにドラッグしてください。
 
 2. 初回起動:
    アプリを右クリック → 開く → ダイアログで「開く」をクリック
@@ -24,4 +24,4 @@ Ghostride - インストールガイド
    システム設定 → プライバシーとセキュリティ → 下にスクロール →「このまま開く」
 
 4. アップデート時:
-   先にGhostrideを終了（メニューバーアイコンを右クリック → 終了）してからドラッグしてください。
+   先にGhostryを終了（メニューバーアイコンを右クリック → 終了）してからドラッグしてください。

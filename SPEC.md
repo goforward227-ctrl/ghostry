@@ -1,8 +1,8 @@
-# Ghostride 仕様書
+# Ghostry 仕様書
 
 ## 概要
 
-Ghostrideは、macOSのメニューバーに常駐するElectronアプリ。
+Ghostryは、macOSのメニューバーに常駐するElectronアプリ。
 実行中のClaude Code CLIプロセスを自動検出し、承認待ちプロンプトをワンクリックで承認・却下できるダッシュボードを提供する。
 
 ## 技術スタック
@@ -150,7 +150,7 @@ src/
 
 | データ | 保存先 |
 |-------|--------|
-| プロジェクト名 | `~/Library/Application Support/ghostride/project-names.json` |
+| プロジェクト名 | `~/Library/Application Support/ghostry/project-names.json` |
 | ウィンドウ位置 | 毎回トレイアイコン位置から計算 |
 | 単一インスタンスロック | Electron の `requestSingleInstanceLock()` |
 
@@ -159,10 +159,10 @@ src/
 - **macOS 専用**: AppleScript による入力送信は macOS のみ対応
 - **対応ターミナル**: iTerm2, Terminal.app
 - **macOS Sequoia**: TIOCSTI (TTY 入力インジェクション) が無効化されているため、AppleScript の `write text` を使用
-- **自動承認済みセッション**: Claude Code で「Yes, allow all」を選択した操作は承認プロンプトが出ないため Ghostride では検知不可
+- **自動承認済みセッション**: Claude Code で「Yes, allow all」を選択した操作は承認プロンプトが出ないため Ghostry では検知不可
 
 ## 将来構想 (CLI ラッパー方式)
 
 `src/cli/` および `src/shared/protocol.ts` に、node-pty を使った CLI ラッパー方式のコードが残されている。
-この方式では `ghostride claude ...` でラッパー経由で Claude Code を起動し、PTY を直接制御して承認を送信する。
+この方式では `ghostry claude ...` でラッパー経由で Claude Code を起動し、PTY を直接制御して承認を送信する。
 ターミナル依存を排除できるが、ユーザーのワークフロー変更が必要なためペンディング中。
